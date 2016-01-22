@@ -1,12 +1,28 @@
 var gamejs = require('gramework').gamejs,
     conf = require('./conf'),
-    TileMap = require('gramework').tilemap.TileMap,
-    Scene = require('gramework').Scene,
+    MapScene = require('./map_scenes').MapScene,
     Cursor = require('./cursor').Cursor,
-    Unit = require('./cursor').Unit,
+    units = require('./plant_units'),
     GameController = require('gramework').input.GameController,
     availableTiles = require('./tiles').availableTiles,
-    Player = require('./player').Player;
+    HumanPlayer = require('./player').HumanPlayer,
+    PlantPlayer = require('./player').PlantPlayer,
+    plant_tiles = require('./plant_tiles'),
+    SmartTile = require('./tiles').SmartTile,
+    SmartMap = require('./tiles').SmartMap,
+    load_units = require('./plant_units').load_units,
+    UNIT_DATA = require('./unit_data').UNIT_DATA,
+    PLANT_UNIT_DATA = require('./unit_data').PLANT_UNIT_DATA,
+    _ = require('underscore');
+
+var TILESIZE = 16,
+    
+    SCROLLREGION = {
+        width: 16,
+        height: 16
+    },
+    
+    SCROLLSPEED = 2;
 
 // Container for the entire game.
 var Game = exports.Game = function () {
@@ -15,138 +31,193 @@ var Game = exports.Game = function () {
     this.paused = false;
     this.turnQueue = [];
     this.currentPlayer;
+    this.displayWidth = 266;
+    this.displayHeight = 200;
 
-    this.scene = new Scene({
-        width: 800,
-        height: 600
+    this.scene = new MapScene({
+        camHeight: this.displayHeight,
+        camWidth: this.displayWidth,
+        pixelScale: 3,
+        map: new plant_tiles.PlantMap(
+            gamejs.utils.uri.resolve(document.location.href, './assets/remote/test_map.tmx'), {
+            tileModel: plant_tiles.PlantTile
+        })
     });
-    this.map = new TileMap(gamejs.utils.uri.resolve(document.location.href, './assets/images/maps/test_map.tmx'), {});
 
     this.initialize();
 };
 
-Game.prototype.initialize = function() {
-    var player1 = new Player({ human: true });
-    var player2 = new Player({});
+_.extend(Game.prototype, {
+    initialize: function(options) {
+        var player1 = new HumanPlayer({ human: true, scene: this.scene });
+        var player2 = new PlantPlayer({ scene: this.scene });
 
-    this.highlitTiles = [];
+        this.highlitTiles = [];
+        this.scroll = {x: 0, y: 0};
 
-    this.cursor = new Cursor({
-        width: 32,
-        height: 32,
-        x: 0,
-        y: 0,
-        tile_size: 32
-    });
+        var player_units = load_units(UNIT_DATA, player1, this.scene);
+        var plant_units = load_units(PLANT_UNIT_DATA, player2, this.scene);
 
-    var elf = new Unit({
-        width: 32,
-        height: 32,
-        x: 0,
-        y: 0,
-        tile_size: 32,
-        spriteSheet: conf.Images.elf,
-        animations: { frames: 2 },
-        map: this.map
-    });
-    var elf2 = new Unit({
-        width: 32,
-        height: 32,
-        x: 1,
-        y: 0,
-        tile_size: 32,
-        spriteSheet: conf.Images.elf,
-        animations: { frames: 2 },
-        map: this.map
-    });
-    var game = this;
-    this.controlMap = {
-        left: function () {
-            game.cursor.slide([-1, 0]);
-        },
-        up: function () {
-            game.cursor.slide([0, -1]);
-        },
-        right: function () {
-            game.cursor.slide([1, 0]);
-        },
-        down: function () {
-            game.cursor.slide([0, 1]);
-        },
-        action: function() {
-            game.map.deselectAll();
-            var tile = game.map.getTile(game.cursor.tile[0], game.cursor.tile[1]);
-            if (game.currentPlayer.isHuman()) {
-                game.currentPlayer.action(tile);
+        this.cursor = new Cursor({
+            width: TILESIZE,
+            height: TILESIZE,
+            x: 0,
+            y: 0,
+            tile_size: TILESIZE,
+            spriteSheet: gamejs.image.load(conf.Images.cursor),
+            animations: { frames: [0], rate: 12, loop: true },
+            scene: this.scene
+        });
+
+        var game = this;
+        this.controlMap = {
+            left: function () {
+                game.cursor.slide([-1, 0]);
+            },
+            up: function () {
+                game.cursor.slide([0, -1]);
+            },
+            right: function () {
+                game.cursor.slide([1, 0]);
+            },
+            down: function () {
+                game.cursor.slide([0, 1]);
+            },
+            action: function() {
+                var tile = game.scene.map.getTile(game.cursor.coords[0], game.cursor.coords[1]);
+                if (game.currentPlayer.isHuman()) {
+                    game.currentPlayer.action(tile);
+                }
+            },
+            mouseTileCoords: function(pos) {
+                var coords = [];
+                coords[0] = Math.floor((pos[0] + (game.scene.camera.rect.left * game.scene.getPixelScale())) / (game.cursor.tile_size * game.scene.camera.zoom * game.scene.getPixelScale()));
+                coords[1] = Math.floor((pos[1] + (game.scene.camera.rect.top * game.scene.getPixelScale())) / (game.cursor.tile_size * game.scene.camera.zoom * game.scene.getPixelScale()));
+                return coords;
+            },
+            mousePos: function(pos) {
+                pos[0] = Math.floor(pos[0] / game.scene.getPixelScale());
+                pos[1] = Math.floor(pos[1] / game.scene.getPixelScale());
+                return pos;
+            },
+            menu: function() {
+                console.log('yea');
+                if (game.scene.isPaused()) {
+                    game.scene.hideText();
+                } else {
+                    game.scene.showText();
+                }
+            },
+            cancel: function() {
+                game.currentPlayer.deselect();
             }
-        },
-        mousePos: function(pos) {
-            pos[0] = Math.floor(pos[0] / (game.cursor.tile_size * game.scene.camera.zoom));
-            pos[1] = Math.floor(pos[1] / (game.cursor.tile_size * game.scene.camera.zoom));
-            game.cursor.setTilePos(pos);
-        },
-        cancel: function() {
-            game.map.deselectAll();
-            game.currentPlayer.deselect();
+        };
+
+        player1.addOpponent(player2);
+        player2.addOpponent(player1);
+
+        this.turnQueue.push(player1);
+        this.turnQueue.push(player2);
+    },
+
+    draw: function(surface) {
+        this.scene.draw(surface);
+    },
+
+    event: function(ev) {
+        
+        var key = this.cont.handle(ev);
+
+        if (key) {
+            if (key.action == 'keyDown') {
+                this.controlMap[key.label]();
+            }
+            
+            if (key.action == 'mouseMotion') {
+                var coords = this.controlMap.mouseTileCoords(key.value);
+                this.cursor.setTilePos(coords);
+                var pos = this.controlMap.mousePos(key.value);
+                this.manageScrolling(pos);
+            }
+
+            if (key.action == 'mouseClick') {
+                if (key.value === 0) {
+                    this.controlMap.action();
+                } else if (key.value === 2) {
+                    this.controlMap.cancel();
+                }
+            }
         }
-    };
+    },
 
-    this.scene.entities.forEach(function(entity){
-        this.map.getTile(entity.tile[0], entity.tile[1]).addOccupant(entity);
-    }, this);
-    this.scene.pushEntity(this.cursor);
-    this.scene.pushEntity(elf);
-    this.scene.pushEntity(elf2);
-    player1.addUnit(elf);
-    player1.addUnit(elf2);
-    elf.setTile(this.map.getTile(0,0));
-    elf2.setTile(this.map.getTile(1,0));
-    this.scene.pushLayer(this.map);
-
-    this.turnQueue.push(player1);
-    this.turnQueue.push(player2);
-};
-
-Game.prototype.draw = function(surface) {
-    this.scene.draw(surface);
-};
-
-Game.prototype.event = function(ev) {
-    var key = this.cont.handle(ev);
-    if (key) {
-        if (key.keyDown) {
-            this.controlMap[key.label]();
-            console.log(this.highlitTiles);
-        }
-        if (key.mousePos) {
-            this.controlMap.mousePos(key.mousePos);
-        }
-    }
-};
-
-Game.prototype.update = function(dt) {
-    //Manage the turn sequence if we have to
-    this.map.deselectAll();
-    if (this.currentPlayer === undefined){
+    cycleTurn: function(currentPlayer) {
+        this.turnQueue.push(currentPlayer);
         this.setCurrentPlayer(this.turnQueue.shift());
         this.currentPlayer.startTurn();
-    }
-    if (this.currentPlayer.isDone()){
-        this.turnQueue.push(this.currentPlayer);
-        this.setCurrentPlayer(this.turnQueue.shift());
-        this.currentPlayer.startTurn();
-    }
-    if (this.currentPlayer.hasUnitSelected()) {
-        var unit = this.currentPlayer.getSelectedUnit();
-        this.highlitTiles = unit.availableTiles;
-        this.highlitTiles.forEach(function(tile) {
-            tile.glow();
-        }, this);
-    }
-    if (dt > 1000 / 3) dt = 1000 / 3;
-    this.scene.update(dt);
-};
+    },
 
-Game.prototype.setCurrentPlayer = function(player) {
-    this.currentPlayer = player;
-};
+    scrollRight: function() {
+        this.scroll.x = SCROLLSPEED;
+    },
+    scrollLeft: function() {
+        this.scroll.x = -SCROLLSPEED;
+    },
+    scrollUp: function() {
+        this.scroll.y = -SCROLLSPEED;
+    },
+    scrollDown: function() {
+        this.scroll.y = SCROLLSPEED;
+    },
+    stopScrollX: function() {
+        this.scroll.x = 0;
+    },
+    stopScrollY: function() {
+        this.scroll.y = 0;
+    },
+
+    manageScrolling: function(mousePos) {
+        if (mousePos[0] < SCROLLREGION.width) {
+            this.scrollLeft();
+        } else if (mousePos[0] > this.displayWidth - SCROLLREGION.width) {
+            this.scrollRight();
+        } else {
+            this.stopScrollX();
+        }
+        if (mousePos[1] < SCROLLREGION.height) {
+            this.scrollUp();
+        } else if (mousePos[1] > this.displayHeight - SCROLLREGION.height) {
+            this.scrollDown();
+        } else {
+            this.stopScrollY();
+        }
+        if (mousePos[0] > this.displayWidth || mousePos[1] > this.displayHeight) {
+            // Mouse is outside game extents - stop scrolling
+            this.stopScrollY();
+            this.stopScrollX();
+        }
+    },
+
+    update: function(dt) {
+        //Manage the turn sequence if we have to
+        if (this.currentPlayer === undefined){
+            this.setCurrentPlayer(this.turnQueue.shift());
+            this.currentPlayer.startTurn();
+        }
+        this.currentPlayer.update(dt);
+        if (this.currentPlayer.getAwakeAllyCount() == 0) {
+            this.currentPlayer.endTurn();
+        }
+        if (this.currentPlayer.isDone()){
+            this.cycleTurn(this.currentPlayer);
+        }
+
+        this.scene.camera.setSpeed(this.scroll);
+
+        if (dt > 1000 / 3) dt = 1000 / 3;
+        this.scene.update(dt);
+    },
+
+    setCurrentPlayer: function(player) {
+        this.currentPlayer = player;
+    }
+});

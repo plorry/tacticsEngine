@@ -1,17 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title> Cloner </title>
+    <title> Plant Tactics </title>
     <meta charset=utf-8> 
 
     <script src='./bundled.js'></script>
     <style type='text/css'>
+    @font-face{
+            font-family:LoRes;
+            src: url("./assets/fonts/lo-res.TTF");
+        }
+    @font-face{
+        font-family: elogic;
+        src: url("./assets/fonts/emulogic.ttf");
+    }
     body {
       background-color: #000;
+      margin: 0; padding: 0;
     }
     </style>
 </head>
 <body>
-  <canvas id='gjs-canvas' oncontextmenu="return false;"></canvas>
+  <canvas id='gjs-canvas' oncontextmenu="return false;" width=800 height=600></canvas>
+  <p style="visibility: hidden; font-family: LoRes">Okay</p>
+  <p style="visibility: hidden; font-family: elogic">Okay</p>
 </body>
 </html>

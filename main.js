@@ -6,20 +6,22 @@ var gamejs = require('gramework').gamejs,
 
 var main = function() {
 
-    var dispatch = new Dispatcher();
-    var game = new Game();
-    dispatch.push(game);
+    var dispatch = new Dispatcher(gamejs, {
+        initial: new Game(),
+        canvas: {
+            flag: gamejs.display.DISABLE_SMOOTHING
+        }
+    });
+    //dispatch.push(game);
 
     // Play area.
-    var mainSurface = gamejs.display.setMode([800, 600], gamejs.display.DISABLE_SMOOTHING);
 
     gamejs.onTick(function(dt) {
-        dispatch.update(dt);
-        dispatch.draw(mainSurface);
+        dispatch.onTick(dt);
     }, this, conf.globals.fps);
 
     gamejs.onEvent(function(ev) {
-        dispatch.event(ev);
+        dispatch.onEvent(ev);
     });
 };
 
