@@ -40,11 +40,11 @@ var TileSprite = exports.TileSprite = Entity.extend({
             this.anim = new animate.Animation(this.spriteSheet, "static", {
                 static: {frames: _.range(options.animations.frames), rate: 4, loop: true}
             });
-            this.image = this.anim.update(0);
+          //this.image = this.anim.update(0);
         }
         if (options.image) {
-            this.defaultImage = gamejs.image.load(options.image);
-            this.image = this.defaultImage;
+          //  this.defaultImage = gamejs.image.load(options.image);
+          // this.image = this.defaultImage;
         }
 
     },
@@ -55,9 +55,7 @@ var TileSprite = exports.TileSprite = Entity.extend({
     },
 
     update: function(dt) {
-        if (this.onMap) {
-            this.setPos(Math.floor(this.coords[0] * this.tile_size), Math.floor(this.coords[1] * this.tile_size));
-        }
+      this.setPos(Math.floor(this.coords[0] * this.tile_size), Math.floor(this.coords[1] * this.tile_size));
     },
 
     slide: function(vec) {
@@ -343,15 +341,12 @@ var Unit = exports.Unit = TileSprite.extend({
         }
         */
         baseDamage = ((Math.atan((5 * this.stats.power - target.stats.defense) / 5 ) + Math.PI / 2) / Math.PI) * 20;
-        console.log('base damage: ' + baseDamage);
         damageFraction = baseDamage * 0.15;
         damage = baseDamage + _.random(-damageFraction, damageFraction);
         if (damage < 0) {
             damage = 0;
         }
-        console.log('total damage: ' + damage);
         target.hit(damage);
-        console.log(target.type + " " + target.hitPoints);
     },
 
     startPhase: function(phase) {
