@@ -127,6 +127,7 @@ var Unit = exports.Unit = TileSprite.extend({
         this.attackRange = options.attackRange || 1;
         this._canMove = true;
         this.availableTiles = [];
+        this.attackableTiles = [];
         this.noCooccupy = [];
         this.noPass = [];
 
@@ -258,7 +259,7 @@ var Unit = exports.Unit = TileSprite.extend({
             // The unit has moved already. Deselecting exhausts it.
             this.exhaust();
         }
-
+        this.map.dehighlightAll();
         this.currentPhase = 0;
         this._selected = false;
     },
@@ -356,13 +357,16 @@ var Unit = exports.Unit = TileSprite.extend({
             
             this.availableTiles = this.getAvailableTiles();
         } else if (this.currentPhase == ACTIVITY) {
-            // ATTACK phase - determine valid target tiles and highlight
-            var targetTiles = this.getValidTargets();
-
-            if (targetTiles.length === 0) {
-                this.nextPhase();
-            }
+            this.activityPhase();
         }
+    },
+
+    activityPhase: function() {
+      var targetTiles = this.getValidTargets();
+
+      if (targetTiles.length === 0) {
+        this.nextPhase();
+      }
     },
 
     isSelected: function() {
@@ -416,6 +420,15 @@ var Unit = exports.Unit = TileSprite.extend({
         );
         return tiles;
     },
+  
+    getAttackableTiles: function() {
+      var tiles = getTilesInRange(
+        this,
+        this.map,
+        {x: this.coords[0], y: this.coords[1]},
+        this.attackRange,
+      );
+    },
 
     checkTerrainDifficulty: function(tile) {
         // Which terrain is "difficult" will vary by unit type.
@@ -467,7 +480,7 @@ var Unit = exports.Unit = TileSprite.extend({
             pos: [this.rect.left, this.rect.top - 5],
             drift: {x: 0, y:-1}
         });
-        this.scene.pushElement(damageText);
+        this.scene.pushEntity(damageText);
     },
 
     update: function(dt) {
@@ -484,6 +497,14 @@ var Unit = exports.Unit = TileSprite.extend({
                     tile.highlight([45,22,22]);
                 });
             }
+        }
+        if (this.isSelected() && this.phaseOrder[this.currentPhase] == 'attack') {
+          // Attack phase - highlight attackable tiles
+          if (this.player.isHuman()) {
+            this.attackableTiles.forEach(function(tile) {
+              tils.highlight([90, 10, 10]);
+            });
+          }
         }
         if (this.currentPhase == EXHAUSTED) {
             this.exhaust();

@@ -106,12 +106,6 @@ var SmartMap = tilemap.TileMap.extend({
                 if (tile.highlightColour) {
                     gamejs.draw.rect(display, "rgba(" + tile.highlightColour.join() + "," + tile.opac + ")", tile.rect, 0);
                 }
-                if (tile.tempProperties.influenceWeak && tile.tempProperties.influenceWeak.length > 0) {
-                    gamejs.draw.rect(display, "rgba(" + [25,80,40] + "," + tile.opac + ")", tile.rect, 0);
-                }
-                if (tile.tempProperties.influenceStrong && tile.tempProperties.influenceStrong.length > 0) {
-                    gamejs.draw.rect(display, "rgba(" + [100,170,110] + "," + tile.opac + ")", tile.rect, 0);
-                }
             }, this);
         }, this);
     },

@@ -65,22 +65,13 @@ _.extend(Player.prototype, {
     },
 
     getAwakeAllyCount: function() {
-        var count = 0;
-        this.units.forEach(function(unit) {
-            if (unit.isAwake()) {
-                count++;
-            }
-        });
-
+        var count = this.getAwakeAllies().length;
         return count;
     },
 
     getAwakeAllies: function() {
-        var allies = [];
-        this.units.forEach(function(unit) {
-            if (unit.isAwake()) {
-                allies.push(unit);
-            }
+        var allies = this.units._sprites.filter(function(unit) {
+            return unit.isAwake();
         });
 
         return allies;

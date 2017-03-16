@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="16" tileheight="16">
+ <tileset firstgid="1" name="checkerboard" tilewidth="16" tileheight="16">
+  <image source="checkerboard.png" width="160" height="320"/>
+ </tileset>
+ <tileset firstgid="201" name="players" tilewidth="16" tileheight="16">
+  <image source="players.png" width="160" height="320"/>
+ </tileset>
+ <tileset firstgid="401" name="plants" tilewidth="16" tileheight="16">
+  <image source="plants.png" width="160" height="320"/>
+ </tileset>
+ <tileset firstgid="601" name="fog" tilewidth="16" tileheight="16">
+  <image source="fog.png" width="160" height="320"/>
+ </tileset>
+ <tileset firstgid="801" name="elder-spotlight" tilewidth="16" tileheight="16">
+  <image source="elder-spotlight.png" width="160" height="320"/>
+ </tileset>
+ <tileset firstgid="1001" name="map_tiles" tilewidth="16" tileheight="16">
+  <image source="maps/map_tiles.png" width="160" height="320"/>
+ </tileset>
+ <layer name="Base" width="30" height="20">
+  <data encoding="base64" compression="zlib">
+   eJy91rsOgDAIBdAO/qgNq/+/OjUhhIbXheFOxpxCaZWetUjJB84roplVWxraM82T76HCbZS5WSwbUcN2RKsZVaMVOQN8fjo8zTwuOd2odzMj9WZMjztZq+fMI/f0ZiHtzJ020e8J1+pB9h7r6kHHOjKzjVhD5WxV/Oo3Peuj/imi9g9MUPUu
+  </data>
+ </layer>
+ <layer name="Rivers" width="30" height="20">
+  <data encoding="base64" compression="zlib">
+   eJxjYBi+4D8zA8MXIP7HPHD2D5Td36D2DqT/v43gcKcn+Auyk4X+9g6UX78PRL5GCt+Rlr5Gor2jYBRQAwAAXE8WxQ==
+  </data>
+ </layer>
+ <layer name="Rock" width="30" height="20">
+  <data encoding="base64" compression="zlib">
+   eJxLYWFgSMGCqQ2w2YGMxYBYnAb24rNfFogVgFiRhvbC7JaDYnmonfQAtIjHwW73QNo7EHaPtHAeBaNgFIyCoQIArXEMIw==
+  </data>
+ </layer>
+ <layer name="Forest behind" width="30" height="20">
+  <data encoding="base64" compression="zlib">
+   eJzt0rEKACAIhGEHX9l6/Wg4OMQxpeF+kMZPITN1216/y2dMnkkz0p3RYLPDXqcJFwMT5X1eu/Aqs7P8dyZMtiY9pZT6uQNi/REu
+  </data>
+ </layer>
+ <layer name="Players and Plants" width="30" height="20" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJxjYBh84OQA2Hl5AOxEBncH2H5SwD0qmHEaiFkZSdNzhUL7KQljAUZUN5ADQH6WxOHn2UDxpSSGB7HgPhBfReIvw2IPuv2nGLCzibWP1LBeTyO/z8FjLsxOatuNLXxpDUB24vMrPcAGOtg/0H4cBaOAFAAAQpwWlw==
+  </data>
+ </layer>
+ <layer name="Transparency" width="30" height="20">
+  <data encoding="base64" compression="zlib">
+   eJzt1MsOgjAQheFBvEAErRBQLr7/a/q7YEPaME1aYmIX36IJJed0CkZEHmjQwuy0HjFhxnvH9Va+DAfkOOKEMy4oUEbqe0WFGjfcLe/6Pi/KjK6+670dejzxwmDJtuzXZHT11faznY8mo6uvT79Q99lnPiHvs898Qvb1mU/s7/ff/lepb+qb+v5u3w86qjGC
+  </data>
+ </layer>
+ <layer name="Forest in front" width="30" height="20" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJxjYBh4IMoyMuwcBaNgFIyCUTAKRsHIAAC5CwAz
+  </data>
+ </layer>
+ <layer name="fog" width="30" height="20" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUDEYQz8TAEAnEUUz0szMOaicIx9DB3nio/yKR/JpIB3uR/RlJ53COBdoTjYTpEc6jYBSMZJA0QHkMAFmFCR8=
+  </data>
+ </layer>
+ <layer name="elder spotlight" width="30" height="20" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJztzscKAkEURNGB+RKzYlbMilkxK2bFrJj1/3feddOrZgSFKTi7R73StN+JRdc0K2ywwwEnXHDDo3/nr5deH/wIIIgQwoggKvlrxNYYN3EkkEQKaWSQRU7SobJVTJ6bAooooYwKqqihLulQ2SqmwU0TLbTRQRc99DGQdKhsFTPkZoQxJphihjkWWEo6VLaKWXGzxgZb7LDHAUecJB0qW8WcubngihvueOCJF96SDpWtRkRlqxkzZsz8Qz6awCox
+  </data>
+ </layer>
+</map>
