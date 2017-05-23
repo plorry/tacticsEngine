@@ -55,6 +55,13 @@ var SmartTile = tilemap.Tile.extend({
     }
 });
 
+SmartTile.highlightTiles = function(tiles, colour) {
+  // Class method to highlight a group of tiles
+  tiles.forEach(function(tile) {
+    tile.highlight(colour);
+  });
+};
+
 var SmartMap = tilemap.TileMap.extend({
     initialize: function(options) {
         this.contents = new gamejs.sprite.Group();

@@ -1,12 +1,13 @@
 var _ = require('underscore'),
     gamejs = require('gramework').gamejs,
-    conf = require('./conf'),
+    conf = require('../conf'),
 	Entity = require('gramework').Entity,
 	animate = require('gramework').animate,
 	inherits = require('gramework').inherits,
     availableTiles = require('./tiles').availableTiles,
-    FloatingText = require('./text').FloatingText,
-    TILESIZE = conf.TILESIZE;
+  FloatingText = require('./text').FloatingText,
+  SmartTile = require('./tiles').SmartTile,
+  TILESIZE = conf.TILESIZE;
 
 var DIRECTIONS = {
     UP: 0,
@@ -19,15 +20,33 @@ var MOVE = 0,
     ACTIVITY = 1,
     EXHAUSTED = 2;
 
+
+var Tribe = function(name, options) {
+  // A Tribe is a membership group for a unit
+  this.name = name;
+  this.init(options);
+};
+
+Tribe.extend = inherits.extend;
+_.extend(Tribe.prototype, {
+  init: function init(options) {
+    // Initialize a tribe
+    this.allyTribes = options.allyTribes || [];
+    this.enemyTribes = options.enemyTribes || [];
+  },
+});
+
+
 var TileSprite = exports.TileSprite = Entity.extend({
 	initialize: function(options) {
-        this.coords = [options.x, options.y];
-        this.tile_size = options.tile_size;
-        this.activeColor = options.color || "#fe03d4";
-        this.exhaustColor = "#555";
-        this.color = this.activeColor;
-        this.scene = options.scene;
-        this.map = options.map;
+    this.coords = [options.x, options.y];
+    this.tile_size = options.tile_size;
+    this.activeColor = options.color || "#fe03d4";
+    this.exhaustColor = "#555";
+    this.color = this.activeColor;
+    this.scene = options.scene;
+    this.map = options.map;
+    this.tribe = options.tribe || null; // the Tribe this unit belongs to
 
         if (this.map) {
             this.setMap(this.map);
@@ -47,7 +66,21 @@ var TileSprite = exports.TileSprite = Entity.extend({
           // this.image = this.defaultImage;
         }
 
-    },
+  },
+
+  isAlly: function isAlly(unit) {
+    // returns true iff argument unit belongs to friendly tribe of this unit
+    return this.player.opponents.every(function(x) {
+      return x != unit.player;
+    });
+  },
+
+  isEnemy: function isEnemy(unit) {
+    // returns true iff argument unit belongs to enemy tribe of this unit 
+    return this.player.opponents.some(function(x) {
+      return x == unit.player;
+    });
+  },
 
     setMap: function(map) {
         this.map = map;
@@ -125,6 +158,7 @@ var Unit = exports.Unit = TileSprite.extend({
         this.player = options.player;
         this.stats = _.extend(defaultStats, options.stats);
         this.attackRange = options.attackRange || 1;
+        this.minRange = options.minRange || 1;
         this._canMove = true;
         this.availableTiles = [];
         this.attackableTiles = [];
@@ -354,19 +388,27 @@ var Unit = exports.Unit = TileSprite.extend({
         // Setup conditions for new phase
         if (this.currentPhase == MOVE) {
             // MOVE phase - determine the available tiles and highlight
-            
             this.availableTiles = this.getAvailableTiles();
+          if (this.player.isHuman()) {
+              SmartTile.highlightTiles(this.availableTiles, [45, 22, 22]);
+            }
         } else if (this.currentPhase == ACTIVITY) {
             this.activityPhase();
         }
     },
 
-    activityPhase: function() {
-      var targetTiles = this.getValidTargets();
+  activityPhase: function() {
+    this.attackableTiles = this.getAttackableTiles();
+    var targetTiles = this.getValidTargets();
 
       if (targetTiles.length === 0) {
         this.nextPhase();
       }
+          // Attack phase - highlight attackable tiles
+          console.log('me!');
+          if (this.player.isHuman()) {
+            SmartTile.highlightTiles(this.attackableTiles, [90, 75, 0]);
+          }
     },
 
     isSelected: function() {
@@ -427,7 +469,10 @@ var Unit = exports.Unit = TileSprite.extend({
         this.map,
         {x: this.coords[0], y: this.coords[1]},
         this.attackRange,
+        this.minRange
       );
+
+      return tiles
     },
 
     checkTerrainDifficulty: function(tile) {
@@ -483,29 +528,19 @@ var Unit = exports.Unit = TileSprite.extend({
         this.scene.pushEntity(damageText);
     },
 
+    die: function() {
+      // Override this method for custom zero-HP logic
+      // without needing to override the gamejs `kill` method.
+      this.kill()
+    },
+
     update: function(dt) {
         if (this.hitPoints <= 0){
-            this.kill();
+            this.die();
         }
 
         Unit.super_.prototype.update.apply(this, arguments);
 
-        if (this.isSelected() && this.phaseOrder[this.currentPhase] == 'move'){
-            //Move phase - highlight available tiles
-            if (this.player.isHuman()) {
-                this.availableTiles.forEach(function(tile) {
-                    tile.highlight([45,22,22]);
-                });
-            }
-        }
-        if (this.isSelected() && this.phaseOrder[this.currentPhase] == 'attack') {
-          // Attack phase - highlight attackable tiles
-          if (this.player.isHuman()) {
-            this.attackableTiles.forEach(function(tile) {
-              tils.highlight([90, 10, 10]);
-            });
-          }
-        }
         if (this.currentPhase == EXHAUSTED) {
             this.exhaust();
         }

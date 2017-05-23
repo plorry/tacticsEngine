@@ -1,4 +1,4 @@
-var tiles = require('./tiles'),
+var tiles = require('./Tactics/tiles'),
     gamejs = require('gramework').gamejs,
     _ = require('underscore');
 
@@ -15,7 +15,21 @@ var PlantTile = tiles.SmartTile.extend({
 
     setGrowth: function(growthLevel) {
         this.growthLevel = growthLevel;
-    }
+    },
+
+    containsAlly: function containsAlly(unit) {
+      // True iff this tile contains an ally unit to argument unit
+      return this.getContents().some(function(x) {
+        x.isAlly(unit);
+      });
+    },
+
+    containsEnemy: function containsEnemy(unit) {
+      // True iff this tile contains an enemy unit to argument unit
+      return this.getContents().some(function(x) {
+        x.isEnemy(unit);
+      });
+    },
 });
 
 var PlantMap = tiles.SmartMap.extend({

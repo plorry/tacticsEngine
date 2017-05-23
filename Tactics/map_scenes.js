@@ -1,7 +1,7 @@
 var Scene = require('gramework').Scene,
     _ = require('underscore'),
     TextBlock = require('gramework').uielements.TextBlock,
-    conf = require('./conf');
+    conf = require('../conf');
 
 
 var MapScene = exports.MapScene = Scene.extend({

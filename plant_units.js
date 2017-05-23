@@ -1,9 +1,10 @@
-var Unit = require('./cursor').Unit,
-    getTilesInRange = require('./cursor').getTilesInRange,
-    _ = require('underscore'),
-    gamejs = require('gramework').gamejs,
-    TextBlock = require('gramework').uielements.TextBlock,
-    conf = require('./conf');
+var Unit = require('./Tactics/units').Unit,
+  Tribe = require('./Tactics/units').Tribe,
+  getTilesInRange = require('./Tactics/units').getTilesInRange,
+  _ = require('underscore'),
+  gamejs = require('gramework').gamejs,
+  TextBlock = require('gramework').uielements.TextBlock,
+  conf = require('./conf');
 
 
 GREEN = 0;
@@ -164,9 +165,24 @@ var Sage = exports.Sage = ElementalUnit.extend({
 
 
 var KidUnit = ElementalUnit.extend({
-    initialize: function(options) {
-        KidUnit.super_.prototype.initialize.apply(this, arguments);
+  initialize: function(options) {
+    this.captured = false;
+    KidUnit.super_.prototype.initialize.apply(this, arguments);
+  },
+    
+  die: function() {
+    this.captured = true;
+  },
+
+  wake: function() {
+    if (!this.captured) {
+      KidUnit.super_.prototype.wake.apply(this, arguments);
     }
+  },
+
+  rescue: function() {
+    this.captured = false;
+  }
 });
 
 
@@ -466,6 +482,7 @@ var PlantGeneral = exports.PlantGeneral = PlantUnit.extend({
 
     }
 });
+
 
 var UNIT_MAP = {
     'caravan': CaravanUnit,

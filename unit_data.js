@@ -1,30 +1,10 @@
 var TILESIZE = 16;
 
 var UNIT_DATA = exports.UNIT_DATA = [
-    {
-        type: 'caravan',
-            x: 12,
-            y: 8,
-    },
   {
     type: 'kid_green',
-      x: 12,
-      y: 9
-  },
-  {
-    type: 'kid_yellow',
-      x: 13,
-      y: 8
-  },
-  {
-    type: 'kid_green',
-      x: 14,
-      y: 8
-  },
-  {
-    type: 'kid_yellow',
-      x: 13,
-      y: 9
+      x: 4,
+      y: 2
   },
 ];
 
